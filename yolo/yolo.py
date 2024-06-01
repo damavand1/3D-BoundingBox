@@ -19,7 +19,7 @@ class cv_Yolo:
         self.labels = open(labels_path).read().split("\n")
 
         np.random.seed(42)
-        self.colors = np.random.randint(0,255, size=(len(self.labels), 3), dtype="uint8")
+        self.colors = np.random.randint(0, 255, size=(len(self.labels), 3), dtype="uint8")
 
         weights_path = os.path.sep.join([yolo_path, "yolov3.weights"])
         cfg_path = os.path.sep.join([yolo_path, "yolov3.cfg"])
@@ -28,11 +28,16 @@ class cv_Yolo:
 
     def detect(self, image):
         # assert image is opencv
-        (H,W) = image.shape[:2]
+        (H, W) = image.shape[:2]
 
         ln = self.net.getLayerNames()
-        ln = [ln[i[0] - 1] for i in self.net.getUnconnectedOutLayers()]
-
+        unconnected_layers = self.net.getUnconnectedOutLayers()
+        
+        # Handle both cases where unconnected_layers is a scalar or an array
+        if isinstance(unconnected_layers, np.ndarray):
+            unconnected_layers = unconnected_layers.flatten()
+        ln = [ln[i - 1] for i in unconnected_layers]
+        
         # prepare input
         blob = cv2.dnn.blobFromImage(image, 1 / 255.0, (416, 416), swapRB=True, crop=False)
 
