@@ -121,27 +121,50 @@ class Elements:
 #         finally:
 #             s.close()  # بستن اتصال
 
-def send_positions_single(_elements: Elements):
-        print("aaa")
+def connect_to_server():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((HOST, PORT))
+        print("Connected to server")
+        return s
+    except (ConnectionRefusedError, ConnectionResetError, BrokenPipeError) as e:
+        print(f"Connection failed: {e}")
+        return None
 
-    #while True:
-        try:
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.connect((HOST, PORT))
-                print("Connected to server")
-                while True:
-                    #data = json.dumps(_elements).encode('utf-8')
-                    #data=bytes(_elements.toJSON(),'utf-8')
-                    #print(_elements.toJSON())
-                    #s.sendall(data)
-                    print(json.dumps(_elements.to_dict(), indent=4))
-                    s.sendall(json.dumps(_elements.to_dict(), indent=4).encode())
-                    time.sleep(1)  # ارسال داده‌ها هر ثانیه
-        except (ConnectionRefusedError, ConnectionResetError, BrokenPipeError) as e:
-            print(f"Connection failed: {e}")
-            time.sleep(5)  # تلاش مجدد بعد از 5 ثانیه
-        finally:
-            s.close()  # بستن اتصال
+# def send_positions_single(_elements: Elements):
+#         print("aaa")
 
-# if __name__ == "__main__":
-#     send_positions()
+#     #while True:
+#         try:
+#             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+#                 s.connect((HOST, PORT))
+#                 print("Connected to server")
+#                 #while True:
+#                     #data = json.dumps(_elements).encode('utf-8')
+#                     #data=bytes(_elements.toJSON(),'utf-8')
+#                     #print(_elements.toJSON())
+#                     #s.sendall(data)
+#                 print(json.dumps(_elements.to_dict(), indent=4))
+#                 s.sendall(json.dumps(_elements.to_dict(), indent=4).encode())
+#                 #time.sleep(1)  # ارسال داده‌ها هر ثانیه
+#         except (ConnectionRefusedError, ConnectionResetError, BrokenPipeError) as e:
+#             print(f"Connection failed: {e}")
+#             time.sleep(5)  # تلاش مجدد بعد از 5 ثانیه
+#         finally:
+#             s.close()  # بستن اتصال
+
+# # if __name__ == "__main__":
+# #     send_positions()
+
+
+def send_positions_single(sock, _elements: Elements):
+    try:
+        sss=json.dumps(_elements.to_dict(), indent=4)
+        zzz=json.dumps(_elements.to_dict(), indent=4).encode()
+        print(json.dumps(_elements.to_dict(), indent=4))
+        sock.sendall(zzz)
+    except (ConnectionResetError, BrokenPipeError) as e:
+        print(f"Connection failed during send: {e}")
+        sock.close()
+        return False
+    return True
