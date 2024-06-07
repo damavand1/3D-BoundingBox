@@ -77,12 +77,12 @@ def main():
 
 
 
-    video_path ="/home/user1/Desktop/Pirooz testing/20240222_103752.mp4" # wideq
+    #video_path ="/home/user1/Desktop/Pirooz testing/20240222_103752.mp4" # wideq
     #video_path ="/home/user1/Desktop/Pirooz testing/Driving in Central Prague Czechia - the Heart of Europe - 4K City Drive.mp4" # wideq
-    #video_path ="/home/user1/Desktop/Pirooz testing/20240222_104259.mp4" # wideq
+    video_path ="/home/user1/Desktop/Pirooz testing/20240222_104259.mp4" # wideq
    
    
-
+    #cap=cv2.VideoCapture(0)
     cap=cv2.VideoCapture(video_path)
 
     # Get the original width and height of the video
@@ -90,16 +90,16 @@ def main():
     original_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
     # Calculate the new width and height while preserving aspect ratio
-    target_width = 640
-    target_height = int(original_height * target_width / original_width)
+    target_width_ForShowToUser = 640
+    target_height_ForShowToUser = int(original_height * target_width_ForShowToUser / original_width)
+
+    target_width_ForModel = 1242
+    target_height_ForModel = int(original_height * target_width_ForModel / original_width)
 
 
     sock = connect_to_server()
     if not sock:
         return
-    
-    pics=[f for f in os.listdir('/home/user1/Desktop/3D-BoundingBox-master-Khadem/3D-BoundingBox-master/eval/image_2/')]
-    picIndex=0
     
     while cap.isOpened():
         # Read a frame from the video
@@ -107,11 +107,9 @@ def main():
 
 
         if success:
-
-            #frame = cv2.resize(frame, (target_width, target_height))
-            #frame = cv2.imread('/home/user1/Desktop/3D-BoundingBox-master-Khadem/3D-BoundingBox-master/eval/image_2/000009.png')
-            frame = cv2.imread('/home/user1/Desktop/3D-BoundingBox-master-Khadem/3D-BoundingBox-master/eval/image_2/'+pics[picIndex])
-            picIndex=(picIndex+1) % len(pics)
+            
+            frame = cv2.resize(frame, (target_width_ForModel, target_height_ForModel))
+            #frame = cv2.imread('/home/user1/Desktop/3D-BoundingBox-master-Khadem/3D-BoundingBox-master/eval/image_2/000008.png')
             
             cal_dir = FLAGS.cal_dir
             #img_file = "/home/user1/Desktop/3D-BoundingBox-master-Khadem/3D-BoundingBox-master/eval/image_2/0.png"
@@ -186,21 +184,32 @@ def main():
                      numpy_vertical = np.concatenate((truth_img, img), axis=0)
                      cv2.imshow('SPACE for next image, any other key to exit', numpy_vertical)
                 else:
-                     cv2.imshow('3D detections', img)
-
+                     #cv2.imshow('3D detections Full', img)
+                     img2 = cv2.resize(img, (target_width_ForShowToUser, target_height_ForShowToUser))
+                     cv2.imshow('3D detections', img2)
+                     
                 #currElement=Element("1", Position(location[0],location[1],location[2]), Rotation(0,alpha_deg,0))
                 
                 # AAAALWAYZ Y IS NOT TRUE, CHECK IT AGAIN, WE SET IT 0 BE DEFAULT
                 #alpha_deg=180
-                currElement=Element("1", Position(location[0],0,location[2]), Rotation(0,int(alpha_deg)+90,0))
-                
-                
+                if (detection.detected_class=="car"):
+                    currElement=Element("1", Position(location[0],0,location[2]), Rotation(0,int(alpha_deg)+90,0))
+                elif (detection.detected_class=="motorbike"):
+                    currElement=Element("3", Position(location[0],0,location[2]), Rotation(0,int(alpha_deg)+90,0))                
+                elif (detection.detected_class=="truck"):
+                    currElement=Element("7", Position(location[0],0,location[2]), Rotation(0,int(alpha_deg)+90,0))
+                elif (detection.detected_class=="pedestrian"):
+                    currElement=Element("5", Position(location[0],0,location[2]), Rotation(0,int(alpha_deg)+90,0))
+                else:
+                    currElement=Element("0", Position(location[0],0,location[2]), Rotation(0,int(alpha_deg)+90,0))
+               
                 #e= Elements([Element("1", Position(location[0],location[1],location[2]), Rotation(0,alpha_deg,0))])
 
                 ListOfElements.append(currElement)
 
                 if cv2.waitKey(1) & 0xFF == ord("q"):
-                   break
+                   #break
+                   exit()
 
                 #if FLAGS.video:
                 #    cv2.waitKey(1)
@@ -213,7 +222,7 @@ def main():
 
             send_positions_single(sock,e)
                     
-            cv2.waitKey(0)
+            #cv2.waitKey(0)
 
 
 if __name__ == '__main__':
