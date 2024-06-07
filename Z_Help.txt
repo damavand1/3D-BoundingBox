@@ -1,0 +1,9 @@
+If we give this error from python
+it means server buffer is low
+
+OSError: [Errno 9] Bad file descriptor
+
+
+improve buffer value
+byte[] data = new byte[4096];
+                            
