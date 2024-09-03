@@ -16,7 +16,7 @@ def main():
     # hyper parameters
     epochs = 100
     batch_size = 8
-    alpha = 0.6 # Damavand1: α is Learing rate => new_Wjk = Old_Wjk - α * δE/δWjk
+    alpha = 0.6 # Damavand1: α is Learing rate => new_Wjk = Old_Wjk - α * δE/δWjk (Jalaseye 20 om hamriooyesh)
     w = 0.4
 
     print("Loading all detected objects in dataset...")
